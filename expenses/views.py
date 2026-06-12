@@ -2,14 +2,19 @@ from rest_framework import status
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
 from .models import Category, Expense
 from .serializers import CategorySerializer, ExpenseSerializer
+from collections import defaultdict
+from decimal import Decimal
+from django.conf import settings
+
+from .services.currency import convert_amount
 
 
 @api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
 def category_list(request):
     if request.method == "GET":
         categories = Category.objects.filter(user=request.user)
@@ -45,15 +50,13 @@ def expense_list(request):
 
 
 @api_view(["GET", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])
 def expense_detail(request, pk):
-    try:
-        expense = get_object_or_404(
+    expense = get_object_or_404(
             Expense,
             pk=pk,
             user=request.user,
             )
-    except Expense.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
         serializer = ExpenseSerializer(expense)
@@ -70,11 +73,49 @@ def expense_detail(request, pk):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def expense_summary(request):
-    summary = (
-        Expense.objects.filter(user=request.user)
-        ("category__name")
-        .annotate(total=Sum("amount"))
-        .order_by("category__name")
+    expenses = Expense.objects.filter(
+        user=request.user
     )
-    return Response(list(summary))
+
+    category_totals = defaultdict(
+        lambda: Decimal("0.00")
+    )
+
+    for expense in expenses:
+        converted_amount, _ = convert_amount(
+            expense.amount,
+            expense.currency,
+            settings.BASE_CURRENCY,
+        )
+
+        category_totals[
+            expense.category.name
+        ] += converted_amount
+
+    categories = []
+
+    for category, total in category_totals.items():
+        categories.append(
+            {
+                "category": category,
+                "total": str(
+                    total.quantize(
+                        Decimal("0.01")
+                    )
+                ),
+            }
+        )
+
+    categories.sort(
+        key=lambda item: item["category"]
+    )
+
+    return Response(
+        {
+            "base_currency":
+                settings.BASE_CURRENCY,
+            "categories": categories,
+        }
+    )
