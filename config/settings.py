@@ -93,3 +93,13 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
+
+BASE_CURRENCY = os.getenv("BASE_CURRENCY", "USD")
+
+EXCHANGE_RATE_API_URL = os.getenv(
+    "EXCHANGE_RATE_API_URL"
+)
+
+EXCHANGE_RATE_API_KEY = os.getenv(
+    "EXCHANGE_RATE_API_KEY"
+)
