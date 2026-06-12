@@ -8,6 +8,12 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255, blank=True)
 
+    monthly_limit = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
     class Meta:
         verbose_name_plural = "categories"
         constraints = [
