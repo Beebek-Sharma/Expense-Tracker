@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from .models import Category, Expense
 from .serializers import CategorySerializer, ExpenseSerializer
@@ -145,5 +146,39 @@ def expense_summary(request):
             "base_currency":
                 settings.BASE_CURRENCY,
             "categories": categories,
+        }
+    )
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def monthly_summary(request):
+    today = timezone.now().date()
+
+    expenses = Expense.objects.filter(
+        user=request.user,
+        date__year=today.year,
+        date__month=today.month,
+    )
+
+    total = Decimal("0.00")
+
+    for expense in expenses:
+        converted_amount, _ = convert_amount(
+            expense.amount,
+            expense.currency,
+            settings.BASE_CURRENCY,
+        )
+
+        total += converted_amount
+
+    return Response(
+        {
+            "month": today.strftime("%Y-%m"),
+            "base_currency": settings.BASE_CURRENCY,
+            "total": str(
+                total.quantize(
+                    Decimal("0.01")
+                )
+            ),
         }
     )
