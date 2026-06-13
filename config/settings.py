@@ -9,6 +9,15 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-me")
 
+# Telegram bot token for sending alerts.
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_CHAT_ID = os.getenv("BOT_CHAT_ID")
+
+# Discord webhook URL for sending alerts.
+DISCORD_WEBHOOK_URL = os.getenv(
+    "DISCORD_WEBHOOK_URL"
+)
+
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
@@ -103,3 +112,4 @@ EXCHANGE_RATE_API_URL = os.getenv(
 EXCHANGE_RATE_API_KEY = os.getenv(
     "EXCHANGE_RATE_API_KEY"
 )
+
