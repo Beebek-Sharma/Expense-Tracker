@@ -11,6 +11,7 @@ from decimal import Decimal
 from django.conf import settings
 
 from .services.currency import convert_amount
+from .services.budget import check_budget_limit
 
 
 @api_view(["GET", "POST"])
@@ -45,7 +46,14 @@ def expense_list(request):
 
     serializer = ExpenseSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save(user=request.user)
+    expense = serializer.save(
+        user=request.user
+    )
+   
+
+    check_budget_limit(
+        expense.category
+    )
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -65,7 +73,13 @@ def expense_detail(request, pk):
     if request.method == "PUT":
         serializer = ExpenseSerializer(expense, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        expense = serializer.save(
+            user=request.user
+        )
+
+        check_budget_limit(
+            expense.category
+        )
         return Response(serializer.data)
 
     expense.delete()
