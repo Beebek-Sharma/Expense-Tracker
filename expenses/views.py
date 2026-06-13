@@ -34,8 +34,22 @@ def expense_list(request):
     if request.method == "GET":
         expenses = Expense.objects.filter(user=request.user)
 
+        search = request.query_params.get("search")
+        category = request.query_params.get("category")
+
+        if search:
+            expenses = expenses.filter(
+                title__icontains=search
+            )
+
+        if category:
+            expenses = expenses.filter(
+                category_id=category
+            )
+
         start_date = request.query_params.get("start_date")
         end_date = request.query_params.get("end_date")
+
         if start_date:
             expenses = expenses.filter(date__gte=start_date)
         if end_date:
