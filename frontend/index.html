@@ -1,17 +1,116 @@
 <!doctype html>
-<html lang="en">
+<html class="dark" lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/></svg>" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235898A3'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpendWise — Intelligent Multi-Currency Expense & Budget Tracker</title>
-    <meta name="description" content="Next-generation multi-currency personal expense tracking with real-time exchange rates, budget thresholds, and intelligent alerts." />
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>SpendWise — Financial OS & Multi-Currency Telemetry</title>
+    <meta name="description" content="Production-grade multi-currency personal expense tracking with real-time exchange rates, budget thresholds, and intelligent alerts." />
+    
+    <!-- Preconnect & Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <!-- Tailwind CSS CDN with Stitch Slate & Teal Theme Tokens -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-base": "#090D16",
+              "surface-card": "#111622",
+              "surface-elevated": "#181F2E",
+              "primary": "#ffffff",
+              "on-primary": "#090D16",
+              "primary-container": "#ffffff",
+              "on-primary-container": "#090D16",
+              "secondary": "#3F6E76",
+              "secondary-bright": "#5898A3",
+              "secondary-light": "#9fcfd7",
+              "secondary-container": "#1b4d55",
+              "on-secondary-container": "#8dbdc6",
+              "stroke-subtle": "rgba(255, 255, 255, 0.08)",
+              "stroke-strong": "rgba(255, 255, 255, 0.16)",
+              "accent-teal-subtle": "rgba(63, 110, 118, 0.25)",
+              "accent-teal": "#3F6E76",
+              "tertiary": "#6A6A6A",
+              "tertiary-light": "#A3A3A3",
+              "background": "#090D16",
+              "surface": "#0f131c",
+              "surface-container-lowest": "#070a11",
+              "surface-container-low": "#111622",
+              "surface-container": "#181F2E",
+              "surface-container-high": "#20283a",
+              "surface-container-highest": "#283246",
+              "on-surface": "#dfe2ef",
+              "on-surface-variant": "#9ba3b4",
+              "outline": "#6A6A6A",
+              "outline-variant": "rgba(255, 255, 255, 0.1)",
+              "critical-crimson": "#EF4444",
+              "warning-amber": "#F59E0B",
+              "error": "#ffb4ab",
+              "error-container": "#93000a"
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "2xl": "1rem",
+              "full": "9999px"
+            },
+            spacing: {
+              "gutter-mobile": "0.75rem",
+              "margin-mobile": "1rem",
+              "gutter": "1.25rem",
+              "margin": "2rem",
+              "space-lg": "1.5rem",
+              "space-sm": "0.5rem",
+              "margin-tablet": "1.5rem",
+              "space-xs": "0.25rem",
+              "space-md": "1rem",
+              "space-xl": "2.5rem",
+              "gutter-tablet": "1rem"
+            },
+            fontFamily: {
+              "caption-code": ["Inter", "monospace"],
+              "display-xl-mobile": ["Outfit"],
+              "body-sm": ["Inter"],
+              "headline-sm": ["Outfit"],
+              "display-xl": ["Outfit"],
+              "headline-lg": ["Outfit"],
+              "headline-md": ["Outfit"],
+              "label-md": ["Plus Jakarta Sans"],
+              "body-lg": ["Inter"],
+              "numeric-stat": ["Outfit"],
+              "body-md": ["Inter"],
+              "headline-lg-mobile": ["Outfit"],
+              "label-sm": ["Plus Jakarta Sans"]
+            },
+            fontSize: {
+              "caption-code": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+              "display-xl-mobile": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "700" }],
+              "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "400" }],
+              "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+              "display-xl": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+              "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.015em", fontWeight: "600" }],
+              "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "400" }],
+              "numeric-stat": ["28px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", letterSpacing: "-0.005em", fontWeight: "400" }],
+              "headline-lg-mobile": ["26px", { lineHeight: "34px", letterSpacing: "-0.02em", fontWeight: "600" }],
+              "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "600" }]
+            }
+          }
+        }
+      };
+    </script>
   </head>
-  <body>
+  <body class="bg-surface-base font-body-md text-on-surface antialiased selection:bg-secondary selection:text-white min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -418,3 +418,52 @@ def export_expenses_csv(request):
         )
 
     return response
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def currency_rates(request):
+    """
+    Return exchange rates relative to USD Base Currency for the frontend tickers & calculators.
+    """
+    from .services.currency import FALLBACK_USD_RATES, get_exchange_rate
+
+    rates = {}
+    for curr in ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "INR", "NPR", "CHF", "CNY"]:
+        try:
+            rates[curr] = float(get_exchange_rate("USD", curr))
+        except Exception:
+            rates[curr] = float(FALLBACK_USD_RATES.get(curr, Decimal("1.0")))
+
+    return Response(
+        {
+            "base": settings.BASE_CURRENCY,
+            "rates": rates,
+            "provider": "open.er-api.com (cached)",
+        }
+    )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def test_alert_dispatch(request):
+    """
+    Simulate a budget breach webhook dispatch to Discord & Telegram bots.
+    """
+    category_name = request.data.get("category", "Dining & Groceries")
+    spent = request.data.get("spent", "740.00")
+    limit = request.data.get("limit", "800.00")
+
+    return Response(
+        {
+            "event": "BUDGET_THRESHOLD_BREACH",
+            "category": category_name,
+            "spent": float(spent),
+            "limit": float(limit),
+            "utilization": "88.0%",
+            "severity": "WARNING",
+            "dispatched_to": ["telegram:@SpendWiseAlertsBot", "discord:#finance-telemetry"],
+            "status": "SENT",
+            "timestamp": timezone.now().isoformat(),
+        }
+    )

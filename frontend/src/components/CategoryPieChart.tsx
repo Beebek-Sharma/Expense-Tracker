@@ -1,97 +1,87 @@
-import { useState } from 'react';
-
-interface CategoryShare {
-  name: string;
-  total: number;
-  color: string;
-  percentage: number;
-}
+import React, { useState } from 'react';
 
 interface Props {
   data: { category: string; total: string }[];
   baseCurrency: string;
 }
 
-const PALETTE = [
-  'hsl(243, 75%, 59%)', // Indigo
-  'hsl(186, 92%, 48%)', // Cyan
-  'hsl(152, 76%, 42%)', // Emerald
-  'hsl(38, 92%, 50%)',  // Amber
-  'hsl(350, 89%, 60%)', // Rose
-  'hsl(280, 80%, 60%)', // Violet
-  'hsl(200, 90%, 55%)', // Sky
-  'hsl(25, 95%, 55%)',  // Orange
+const STITCH_PALETTE = [
+  '#3F6E76', // Slate Teal Primary
+  '#F59E0B', // Amber Warning
+  '#5898A3', // Bright Teal
+  '#9fcfd7', // Light Teal
+  '#6A6A6A', // Slate Neutral
+  '#EF4444', // Crimson
+  '#8B5CF6', // Purple
+  '#10B981', // Emerald
 ];
 
-export const CategoryPieChart = ({ data, baseCurrency }: Props) => {
+export const CategoryPieChart: React.FC<Props> = ({ data, baseCurrency }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const numericData = data
     .map((item, idx) => ({
       name: item.category,
       total: parseFloat(item.total) || 0,
-      color: PALETTE[idx % PALETTE.length],
+      color: STITCH_PALETTE[idx % STITCH_PALETTE.length],
     }))
     .filter((d) => d.total > 0);
 
   const grandTotal = numericData.reduce((acc, curr) => acc + curr.total, 0);
 
-  const processedData: CategoryShare[] = numericData.map((d) => ({
+  const processedData = numericData.map((d) => ({
     ...d,
     percentage: grandTotal > 0 ? (d.total / grandTotal) * 100 : 0,
   }));
 
   if (processedData.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-        <p>No category expense data recorded yet.</p>
-        <span style={{ fontSize: '12px' }}>Add expenses to see category breakdown.</span>
+      <div className="flex flex-col items-center justify-center py-12 text-center text-on-surface-variant font-caption-code text-xs">
+        <span className="material-symbols-outlined text-3xl text-tertiary mb-2">pie_chart</span>
+        <p>No category expenses recorded yet.</p>
+        <span className="text-tertiary">Log an expense to see normalized distribution.</span>
       </div>
     );
   }
 
-  // Generate SVG Donut paths
-  let accumulatedAngle = 0;
-  const radius = 80;
-  const strokeWidth = 28;
-  const center = 100;
-  const circumference = 2 * Math.PI * radius;
+  // SVG Donut geometry
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius; // ~238.76
+  let accumulatedLength = 0;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-      <div style={{ position: 'relative', width: 200, height: 200, flexShrink: 0 }}>
-        <svg width="200" height="200" viewBox="0 0 200 200">
+    <div className="flex flex-col justify-between h-full">
+      {/* SVG Donut Chart Container */}
+      <div className="relative flex items-center justify-center my-4">
+        <svg className="w-48 h-48 sm:w-52 sm:h-52 transform -rotate-90" viewBox="0 0 100 100">
+          {/* Background Ring */}
           <circle
-            cx={center}
-            cy={center}
+            cx="50"
+            cy="50"
             r={radius}
             fill="transparent"
-            stroke="hsla(220, 30%, 20%, 0.4)"
-            strokeWidth={strokeWidth}
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="12"
           />
+          {/* Colored Segments */}
           {processedData.map((slice, idx) => {
-            const strokeDasharray = `${(slice.percentage / 100) * circumference} ${circumference}`;
-            const strokeDashoffset = -accumulatedAngle;
-            accumulatedAngle += (slice.percentage / 100) * circumference;
-
+            const strokeDashLength = (slice.percentage / 100) * circumference;
+            const strokeDashoffset = -accumulatedLength;
+            accumulatedLength += strokeDashLength;
             const isHovered = hoveredIdx === idx;
 
             return (
               <circle
                 key={slice.name}
-                cx={center}
-                cy={center}
+                cx="50"
+                cy="50"
                 r={radius}
                 fill="transparent"
                 stroke={slice.color}
-                strokeWidth={isHovered ? strokeWidth + 4 : strokeWidth}
-                strokeDasharray={strokeDasharray}
-                strokeDashoffset={strokeDashoffset}
-                style={{
-                  transition: 'all 200ms ease',
-                  cursor: 'pointer',
-                  filter: isHovered ? `drop-shadow(0 0 8px ${slice.color})` : 'none',
-                }}
+                strokeWidth={isHovered ? 14 : 12}
+                strokeDasharray={`${strokeDashLength.toFixed(2)} ${circumference.toFixed(2)}`}
+                strokeDashoffset={strokeDashoffset.toFixed(2)}
+                className="transition-all duration-300 cursor-pointer"
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
               />
@@ -99,66 +89,41 @@ export const CategoryPieChart = ({ data, baseCurrency }: Props) => {
           })}
         </svg>
 
-        {/* Center Label */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-          }}
-        >
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            {hoveredIdx !== null ? processedData[hoveredIdx].name : 'Total Spent'}
+        {/* Center Hole Label */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+          <span className="font-caption-code text-[11px] text-tertiary-light uppercase">Total Outflow</span>
+          <span className="font-headline-md text-xl sm:text-2xl font-bold text-primary">
+            {baseCurrency === 'USD' ? '$' : `${baseCurrency} `}
+            {grandTotal >= 1000 ? grandTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : grandTotal.toFixed(2)}
           </span>
-          <span style={{ fontSize: '16px', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)' }}>
-            {hoveredIdx !== null
-              ? `${processedData[hoveredIdx].percentage.toFixed(1)}%`
-              : `${baseCurrency} ${grandTotal.toFixed(2)}`}
+          <span className="font-caption-code text-[11px] text-secondary-bright">
+            {processedData.length} {processedData.length === 1 ? 'Category' : 'Categories'}
           </span>
         </div>
       </div>
 
-      {/* Legend */}
-      <div style={{ flex: 1, minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {processedData.map((item, idx) => (
+      {/* Donut Legend */}
+      <div className="flex flex-col gap-1.5 mt-2 pt-3 border-t border-stroke-subtle font-body-sm text-xs">
+        {processedData.slice(0, 5).map((slice, idx) => (
           <div
-            key={item.name}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '6px 10px',
-              borderRadius: 'var(--radius-sm)',
-              background: hoveredIdx === idx ? 'var(--bg-elevated)' : 'transparent',
-              cursor: 'pointer',
-              transition: 'background 150ms ease',
-            }}
+            key={slice.name}
             onMouseEnter={() => setHoveredIdx(idx)}
             onMouseLeave={() => setHoveredIdx(null)}
+            className={`flex items-center justify-between p-1.5 rounded transition-colors cursor-pointer ${hoveredIdx === idx ? 'bg-surface-elevated text-primary' : 'hover:bg-surface-elevated/60 text-on-surface'}`}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="flex items-center gap-2 min-w-0">
               <span
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  backgroundColor: item.color,
-                }}
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: slice.color }}
               />
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)' }}>
-                {item.name}
-              </span>
+              <span className="truncate">{slice.name}</span>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#fff', fontFamily: 'var(--font-mono)' }}>
-                {item.total.toFixed(2)}
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="font-caption-code text-[11px] text-tertiary-light">
+                {slice.percentage.toFixed(0)}%
               </span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                ({item.percentage.toFixed(0)}%)
+              <span className="font-caption-code text-xs font-bold text-primary">
+                ${slice.total.toFixed(2)}
               </span>
             </div>
           </div>

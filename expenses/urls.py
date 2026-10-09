@@ -16,6 +16,8 @@ urlpatterns = [
     path("expenses/monthly-summary/", views.monthly_summary, name="monthly-summary"),
     path("expenses/analytics/", views.analytics_dashboard, name="analytics-dashboard"),
     path("expenses/export/", views.export_expenses_csv, name="export-expenses-csv"),
+    path("expenses/rates/", views.currency_rates, name="currency-rates"),
+    path("expenses/test-alert/", views.test_alert_dispatch, name="test-alert"),
 
     # Expense CRUD endpoints
     path("expenses/", views.expense_list, name="expense-list"),

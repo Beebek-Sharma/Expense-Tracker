@@ -276,6 +276,27 @@ class ApiService {
   getExportCsvUrl(): string {
     return `${API_BASE_URL}/api/expenses/export/`;
   }
+
+  async getRates(): Promise<{ base: string; rates: Record<string, number>; provider: string }> {
+    return this.request<{ base: string; rates: Record<string, number>; provider: string }>('/api/expenses/rates/');
+  }
+
+  async sendTestAlert(data?: { category?: string; spent?: string | number; limit?: string | number }): Promise<{
+    event: string;
+    category: string;
+    spent: number;
+    limit: number;
+    utilization: string;
+    severity: string;
+    dispatched_to: string[];
+    status: string;
+    timestamp: string;
+  }> {
+    return this.request('/api/expenses/test-alert/', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
 }
 
 export const api = new ApiService();
