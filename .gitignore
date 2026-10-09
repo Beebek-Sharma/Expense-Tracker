@@ -1,26 +1,62 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 .Python
+
+# Distribution / packaging
 build/
 dist/
+*/dist/
+**/dist/
 *.egg-info/
 .eggs/
+
+# Virtual environments
 venv/
 .venv/
 env/
 ENV/
+
+# Environment variables & secrets
 .env
-*.log
+.env.*
+!.env.example
 local_settings.py
+
+# Databases
 db.sqlite3
 db.sqlite3-journal
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Expo / React Native
+.expo/
+*/.expo/
+**/.expo/
+.expo-shared/
+
+# Static / Media
 media/
 staticfiles/
-SCREENER.md
-ANSWER_KEY.md
+
+# System & Editor files
+.DS_Store
+Thumbs.db
 .idea/
 .vscode/
 *.swp
-.DS_Store
+SCREENER.md
+ANSWER_KEY.md
 uv.lock/

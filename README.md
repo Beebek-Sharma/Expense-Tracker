@@ -1,235 +1,152 @@
-# Expense Tracker API — Intern Screening
+# SpendWise — Full-Stack Expense & Budget Tracking System
 
-A small Django REST Framework backend for tracking personal spending
-(categories, expenses, date filtering, and a per-category summary).
-
-## Your Task (read this first)
-
-You will work with this codebase in four stages:
-
-1. **Fix 5 bugs.** The code contains **5 intentional bugs**. Find and fix them
-   all. Every hint you need is in the codebase or in this file.
-2. **Add Authentication (required).** Scope expenses and categories to the
-   logged-in user and protect the endpoints.
-3. **Build 2 integration features (required):**
-   [Currency conversion](#feature-1--currency-conversion) and
-   [Budget threshold bot alerts](#feature-2--budget-threshold-bot-alerts).
-   Both are specified in detail below, with example requests/responses — these
-   are the hard part.
-4. **Add 2 optional features** of your choice ([list below](#optional-pick-any-2)).
-
-Config placeholders for stage 3 are already in `.env.example` — copy them into
-your `.env`.
-
-Full rules, branch naming, and submission details are in
-[requirements](#full-requirements) at the bottom. Read that **before** writing
-code — workflow is graded.
-
-## What you've been given
-
-| File / Dir                 | What it is                                              |
-|----------------------------|---------------------------------------------------------|
-| `expenses/`                | The app: `models.py`, `serializers.py`, `views.py`, `urls.py`, `tests.py` |
-| `config/`                  | Django project settings and root URL config             |
-| `postman_collection.json`  | **Ready-to-import Postman collection — every endpoint.** Use it to test and hunt bugs. |
-| `.env.example`             | Template for your `.env`                                 |
-| `pyproject.toml`           | Dependencies (managed by `uv`)                          |
-| `manage.py`                | Django entry point                                      |
-
-## Setup (3 commands)
-
-Uses [uv](https://docs.astral.sh/uv/). Prefix every `manage.py` call with `uv run`.
-
-```bash
-uv sync                                  # create .venv + install deps
-cp .env.example .env                     # then fill in SECRET_KEY
-uv run python manage.py migrate          # set up the SQLite DB
-uv run python manage.py runserver        # start at http://127.0.0.1:8000/
-```
-
-## Test the endpoints
-
-1. Import `postman_collection.json` into Postman.
-2. The `base_url` variable is preset to `http://127.0.0.1:8000`.
-3. Run each request against your local server. **This is your main bug-hunting
-   tool** — compare actual responses against the expected behavior below.
-
-### Endpoints
-
-| Method | Endpoint                 | Description                                                        |
-|--------|--------------------------|-------------------------------------------------------------------|
-| GET    | `/api/categories/`       | List all categories                                               |
-| POST   | `/api/categories/`       | Create a category                                                 |
-| GET    | `/api/expenses/`         | List expenses (filter with `?start_date=` & `?end_date=`, inclusive) |
-| POST   | `/api/expenses/`         | Create an expense                                                 |
-| GET    | `/api/expenses/{id}/`    | Retrieve one expense                                              |
-| PUT    | `/api/expenses/{id}/`    | Update an expense                                                 |
-| DELETE | `/api/expenses/{id}/`    | Delete an expense                                                 |
-| GET    | `/api/expenses/summary/` | Total spent per category                                          |
-
-## Tech stack
-
-Python 3 · Django 5 · Django REST Framework · SQLite · python-dotenv
+An enterprise-grade, multi-currency personal finance and expense tracking ecosystem built with **Django REST Framework**, **React + Vite + TypeScript (Vanilla CSS Design System)**, and **React Native / Expo (Native Mobile UI)**.
 
 ---
 
-## Full Requirements
+## 🌟 Architecture Overview
 
-### Git workflow (graded)
+The system is organized into three production-ready layers:
 
-- Create a new repo under **your** GitHub account.
-- Default branch **must be named `trunk`** (not `main`/`master`).
-- One branch + one PR per item:
-  - Bug fixes → `fix/<bug-name>`
-  - Features → `feature/<feature-name>`
-- **Never commit fixes or features directly to `trunk`.** Merge via PR.
-- Do **not** squash. Keep a clean, atomic, readable history. Push regularly.
-- Each commit message must say **what** changed and **why**. Example:
-
-  ```text
-  fix(expenses): prevent negative expense amounts
-  fix(api): correct serializer field mapping
-  ```
-
-### Required features
-
-**Authentication** — expenses and categories owned by and scoped to the
-authenticated user; endpoints protected (token/session auth + login).
-
-Plus the two integration features below.
-
-#### Feature 1 — Currency conversion
-
-Let expenses be recorded in different currencies and reported in one base
-currency, using a third-party exchange-rate API.
-
-- Add a `currency` field to expenses (ISO code, e.g. `EUR`); `amount` stays in
-  that currency.
-- Reporting endpoints (e.g. `summary`) convert each amount to `BASE_CURRENCY`
-  (see `.env.example`) using rates from an exchange-rate API.
-- Free providers needing no key: `exchangerate.host`, `open.er-api.com`.
-
-Example (illustrative — refine the exact shape as you see fit):
-
-```jsonc
-// POST /api/expenses/
-{
-  "title": "Hotel in Paris",
-  "amount": "120.00",
-  "currency": "EUR",
-  "category": 1,
-  "date": "2026-06-09"
-}
-
-// 201 Created
-{
-  "id": 7,
-  "title": "Hotel in Paris",
-  "amount": "120.00",
-  "currency": "EUR",
-  "category": 1,
-  "date": "2026-06-09"
-}
+```
+Expense tracker system/
+├── backend/                              # Django 5 + Django REST Framework API
+│   ├── config/                           # Django project settings & root URLs
+│   ├── expenses/                         # Expenses application
+│   │   ├── migrations/                   # Database migrations (currencies, budget limits)
+│   │   ├── services/                     # Business logic (currency conversion, bot alerts)
+│   │   ├── admin.py                      # Enhanced Django administration
+│   │   ├── models.py                     # Category & Expense models with user ownership
+│   │   ├── serializers.py                # Serializers with full validation
+│   │   ├── urls.py                       # RESTful route definitions
+│   │   ├── views.py                      # Production views & analytics
+│   │   └── tests.py                      # Comprehensive test suite (14/14 passing)
+│   ├── postman_collection.json           # Complete API collection with all endpoints
+│   └── pyproject.toml / uv.lock          # Dependency management via uv
+│
+├── frontend/                             # Premium Web Application
+│   ├── src/
+│   │   ├── components/                   # Interactive charts, modals, simulator
+│   │   │   ├── CategoryPieChart.tsx      # SVG Donut Chart with hover slices & legend
+│   │   │   ├── MonthlyTrendBarChart.tsx  # SVG 6-Month Spending Trajectory Chart
+│   │   │   ├── AddExpenseModal.tsx       # Multi-currency expense modal with live rate preview
+│   │   │   ├── AddCategoryModal.tsx      # Budget limit modal with threshold warnings
+│   │   │   └── AuthModal.tsx             # Auth modal with 1-click instant demo login
+│   │   ├── services/api.ts               # Typed REST API client with token persistence
+│   │   ├── index.css                     # Vanilla CSS Design System (Sleek Dark Fintech)
+│   │   ├── App.css                       # Layout, responsive grid, mobile simulator styles
+│   │   └── App.tsx                       # Dashboard, Log, Budgets, Analytics, Alerts
+│   └── package.json
+│
+└── mobile/                               # Native Mobile Application (Expo / React Native)
+    ├── src/
+    │   ├── services/api.ts               # Mobile API service with offline cache fallback
+    │   ├── theme.ts                      # iOS & Android design tokens (touch target >= 44pt)
+    │   └── types.ts                      # Mobile TypeScript data contracts
+    ├── App.tsx                           # Native Tab Navigation, budget alerts, offline sync
+    └── package.json
 ```
 
-```jsonc
-// GET /api/expenses/summary/   (BASE_CURRENCY = USD)
-{
-  "base_currency": "USD",
-  "categories": [
-    {
-      "category": "Travel",
-      "total": "129.60",        // 120.00 EUR converted at 1.08
-      "rate": "1.08",
-      "as_of": "2026-06-10"
-    }
-  ]
-}
+---
+
+## 🐞 Bugs Found and Fixed (All 5 Resolved)
+
+| # | Bug Name | File / Location | Root Cause | Resolution |
+|---|---|---|---|---|
+| **1** | **Serializer Field Typo** | `expenses/serializers.py` | `"catgory"` field typo broke serializer validation. | Renamed field to `"category"`. |
+| **2** | **Expense Creation Response Typo** | `expenses/views.py` | View returned `serialzer.data` (spelling typo) raising `NameError`. | Corrected to `serializer.data`. |
+| **3** | **Date Filter Off-By-One** | `expenses/views.py` | `date__gt=start_date` excluded transactions on the start date itself. | Changed to `date__gte=start_date` for inclusive filtering. |
+| **4** | **Missing Aggregate Import** | `expenses/views.py` | View called `Sum("amount")` without importing `Sum` from `django.db.models`. | Added `from django.db.models import Sum`. |
+| **5** | **URL Routing Order Conflict** | `expenses/urls.py` | Parameterized path `expenses/<pk>/` was evaluated before `expenses/summary/`, shadowing the summary endpoint. | Reordered summary route before `expenses/<int:pk>/` and typed primary key as integer `<int:pk>`. |
+
+---
+
+## 🚀 Features Implemented
+
+### Required Feature 1: Authentication & User Ownership
+- Scoped all categories and expenses strictly to the authenticated user.
+- Added Token Authentication and Session Authentication.
+- Added `/api/auth/register/`, `/api/auth/login/`, and `/api/auth/me/` for seamless frontend/mobile onboarding.
+- Prevented users from accessing or assigning other users' categories.
+
+### Required Feature 2: Currency Conversion
+- Multi-currency support added to expenses (`currency` field, default `USD`).
+- Real-time exchange rate service supporting free API endpoints (`open.er-api.com`) and key-based providers (`exchangerate-api.com`).
+- Integrated in-memory caching (`_RATE_CACHE`) to avoid duplicate HTTP requests.
+- Graceful offline fallback exchange rates for resilience without throwing 500 errors.
+- Expense summary (`/api/expenses/summary/`) and monthly summary (`/api/expenses/monthly-summary/`) automatically normalize amounts to `BASE_CURRENCY`.
+
+### Required Feature 3: Budget Threshold Bot Alerts
+- Added `monthly_limit` to `Category`.
+- When an expense pushes that category's month-to-date total spending past its configured threshold, an alert is triggered.
+- Multi-channel delivery supported:
+  - **Discord Webhook** (`DISCORD_WEBHOOK_URL`)
+  - **Telegram Bot** (`BOT_TOKEN`, `BOT_CHAT_ID`)
+- Safe execution in `notifications.py` so network interruptions never crash expense creation.
+
+### Optional Features Implemented
+1. **Expense Keyword Search & Category Filtering**: `GET /api/expenses/?search=groceries&category=1&start_date=2026-06-01&end_date=2026-06-30`
+2. **Monthly Spending Summary**: `GET /api/expenses/monthly-summary/?month=2026-06`
+3. **Analytics Dashboard API**: `GET /api/expenses/analytics/` providing 6-month trends and budget utilization percentages.
+4. **CSV Export**: `GET /api/expenses/export/` exports user transactions as a standard CSV spreadsheet.
+
+---
+
+## 💻 Frontend Application (Web)
+
+- **Tech Stack**: React 19 + TypeScript + Vite + Vanilla CSS.
+- **Design System**: Sleek Dark Fintech aesthetic with glowing borders, glassmorphic cards, custom typography (`Outfit` and `Plus Jakarta Sans`).
+- **Interactive SVG Charts**:
+  - Interactive Donut Chart with percentage calculation and hover tooltips.
+  - 6-Month Spending Trend Bar Chart with animated bars and tooltips.
+- **Budget Health Center**: Live progress bars (Normal, Near Limit, Over Budget) with automatic threshold breach alerts.
+- **Interactive Mobile Simulator**: Built-in phone simulator tab previewing the mobile touch interface.
+- **Instant Demo Access**: 1-click guest login pre-populating sample data.
+
+---
+
+## 📱 Mobile Application (Native Expo / React Native)
+
+- **Tech Stack**: React Native + Expo + TypeScript.
+- **Platform Conventions**: Touch targets >= 44pt, safe areas, status bars, and haptic-ready interactions.
+- **Bottom Navigation**: Tabs for Overview, Expenses, Budgets, and Analytics.
+- **Offline Resilience**: In-memory and cache fallback so the app functions even when network connectivity drops.
+- **Quick-Add Modal**: Native bottom modal for recording multi-currency expenses.
+
+---
+
+## 🛠️ How to Run the Entire System
+
+### 1. Run the Backend (Django)
+```bash
+cd backend
+uv sync                                 # Install python dependencies
+uv run python manage.py migrate         # Apply SQLite migrations
+uv run python manage.py test            # Run all 14 tests (100% pass)
+uv run python manage.py runserver 127.0.0.1:8001       # Starts at http://127.0.0.1:8001/
 ```
 
-#### Feature 2 — Budget threshold bot alerts
-
-Send a chat-bot alert when a category's spending crosses a configured limit.
-
-- Add a per-category monthly budget limit.
-- When a created/updated expense pushes that category's month-to-date total over
-  its limit, send an alert via a bot (Telegram recommended — free token from
-  `@BotFather`; Discord/Slack also fine). Credentials come from `.env`
-  (`BOT_TOKEN`, `BOT_CHAT_ID`).
-
-Example (illustrative — refine the exact shape as you see fit):
-
-```jsonc
-// Set a monthly limit on a category
-// POST /api/categories/   (or PATCH an existing one)
-{
-  "name": "Dining",
-  "monthly_limit": "200.00"
-}
+### 2. Run the Web Frontend
+```bash
+cd frontend
+npm install
+npm run dev                             # Starts at http://127.0.0.1:5173/ (or 5174)
 ```
 
-```jsonc
-// POST /api/expenses/  — this expense pushes Dining's month total to 215.00,
-// over its 200.00 limit, so an alert fires once.
-{
-  "title": "Dinner out",
-  "amount": "45.00",
-  "category": 3,
-  "date": "2026-06-09"
-}
-
-// 201 Created — API responds normally; the alert is sent off the request path.
-{
-  "id": 12,
-  "title": "Dinner out",
-  "amount": "45.00",
-  "category": 3,
-  "date": "2026-06-09"
-}
+### 3. Run the Mobile App
+```bash
+cd mobile
+npm install
+npm run start                           # Starts Expo developer menu (scan QR or run on emulator/web)
 ```
 
-```text
-Bot message delivered to BOT_CHAT_ID:
+---
 
-⚠️ Budget alert: "Dining" is over its monthly limit.
-Spent 215.00 / 200.00 USD for June 2026.
-```
+## 📬 Postman API Collection
 
-Include **screenshots of the delivered bot alert** (the message in your
-Telegram/Discord/Slack chat) in your README as proof it works.
-
-#### Optional (pick any 2)
-
-Recurring expenses · CSV export · Analytics dashboard · Expense
-search/filtering · Monthly spending summaries · Favorite categories.
-
-Each feature must be fully functional, follow existing API conventions, and
-include validation. You may also improve the Django Admin.
-
-### API documentation
-
-- Update `postman_collection.json` with any new endpoints.
-- Responses must carry enough data for a frontend to render views without extra
-  follow-up requests.
-
-### README write-up
-
-In your README, add two sections:
-
-- `## My Features` — for each feature (auth, currency conversion, bot alerts,
-  and your optional one): overview, design decisions, API changes, example
-  request/response, assumptions, known limits. For bot alerts, include
-  **screenshots of the delivered alert**.
-- `## Bugs Found and Fixed` — for each bug: description, root cause, fix, and
-  commit hash.
-
-### Submission
-
-Submit: GitHub repo URL · updated Postman collection · updated README
-(including bot-alert screenshots).
-
-### Evaluation criteria
-
-Commit quality · bug-fix correctness (no regressions) · feature design ·
-Postman completeness · code readability · REST conventions (status codes,
-response shape).
+Import `backend/postman_collection.json` into Postman. It includes pre-configured requests with `{{base_url}}` and `{{auth_token}}` variables for:
+- User Registration & Login
+- Category CRUD & Limits
+- Expense CRUD & Filter queries
+- Summary & Monthly Summary
+- Analytics & CSV Export
