@@ -15,7 +15,7 @@ import { AuthModal } from './components/AuthModal';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState<boolean>(() => !api.isAuthenticated());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<'dashboard' | 'expenses' | 'budget' | 'analytics' | 'simulator'>('dashboard');
@@ -67,24 +67,6 @@ export function App() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Check authentication on mount
-  useEffect(() => {
-    if (api.isAuthenticated()) {
-      api
-        .getCurrentUser()
-        .then((user) => {
-          setCurrentUser(user);
-          loadAllData();
-        })
-        .catch(() => {
-          api.logout();
-          setAuthModalOpen(true);
-        });
-    } else {
-      setAuthModalOpen(true);
-    }
-  }, []);
-
   const loadAllData = async () => {
     try {
       const [cats, exps, summ, anal, rData] = await Promise.all([
@@ -104,6 +86,22 @@ export function App() {
       console.error('Failed to load application data:', err);
     }
   };
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (api.isAuthenticated()) {
+      api
+        .getCurrentUser()
+        .then((user) => {
+          setCurrentUser(user);
+          loadAllData();
+        })
+        .catch(() => {
+          api.logout();
+          setAuthModalOpen(true);
+        });
+    }
+  }, []);
 
   const handleLogout = () => {
     api.logout();
@@ -169,18 +167,24 @@ export function App() {
 
   // Threshold Bot Sentinel Status: Check for any near limit (85%+) or breach
   const sentinelBreach = useMemo(() => {
-    for (const cat of categories) {
+    const breached = categories.find((cat) => {
       const limit = cat.monthly_limit ? parseFloat(cat.monthly_limit) : 0;
-      if (limit > 0) {
-        const spent = categorySpendingMap[cat.id] || 0;
-        const ratio = (spent / limit) * 100;
-        if (ratio >= 100) {
-          return { cat: cat.name, spent, limit, ratio, status: 'BREACH' };
-        }
-        if (ratio >= 85) {
-          return { cat: cat.name, spent, limit, ratio, status: 'WARNING' };
-        }
-      }
+      return limit > 0 && ((categorySpendingMap[cat.id] || 0) / limit) * 100 >= 100;
+    });
+    if (breached) {
+      const limit = parseFloat(breached.monthly_limit || '0');
+      const spent = categorySpendingMap[breached.id] || 0;
+      return { cat: breached.name, spent, limit, ratio: (spent / limit) * 100, status: 'BREACH' as const };
+    }
+    const warning = categories.find((cat) => {
+      const limit = cat.monthly_limit ? parseFloat(cat.monthly_limit) : 0;
+      const pct = limit > 0 ? ((categorySpendingMap[cat.id] || 0) / limit) * 100 : 0;
+      return pct >= 85 && pct < 100;
+    });
+    if (warning) {
+      const limit = parseFloat(warning.monthly_limit || '0');
+      const spent = categorySpendingMap[warning.id] || 0;
+      return { cat: warning.name, spent, limit, ratio: (spent / limit) * 100, status: 'WARNING' as const };
     }
     return null;
   }, [categories, categorySpendingMap]);

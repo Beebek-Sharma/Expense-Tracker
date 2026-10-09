@@ -145,7 +145,7 @@ class ApiService {
         ...options,
         headers,
       });
-    } catch (networkErr: any) {
+    } catch {
       throw new Error(
         `Unable to connect to backend server at ${API_BASE_URL}. Please ensure the server is running.`
       );

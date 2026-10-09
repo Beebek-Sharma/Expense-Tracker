@@ -47,7 +47,17 @@ export const CategoryPieChart: React.FC<Props> = ({ data, baseCurrency }) => {
   // SVG Donut geometry
   const radius = 38;
   const circumference = 2 * Math.PI * radius; // ~238.76
-  let accumulatedLength = 0;
+
+  // Precompute segment offsets purely
+  const segments = processedData.map((slice, idx, arr) => {
+    const strokeDashLength = (slice.percentage / 100) * circumference;
+    const strokeDashoffset = -arr.slice(0, idx).reduce((sum, s) => sum + (s.percentage / 100) * circumference, 0);
+    return {
+      ...slice,
+      strokeDashLength,
+      strokeDashoffset,
+    };
+  });
 
   return (
     <div className="flex flex-col justify-between h-full">
@@ -64,10 +74,7 @@ export const CategoryPieChart: React.FC<Props> = ({ data, baseCurrency }) => {
             strokeWidth="12"
           />
           {/* Colored Segments */}
-          {processedData.map((slice, idx) => {
-            const strokeDashLength = (slice.percentage / 100) * circumference;
-            const strokeDashoffset = -accumulatedLength;
-            accumulatedLength += strokeDashLength;
+          {segments.map((slice, idx) => {
             const isHovered = hoveredIdx === idx;
 
             return (
@@ -79,8 +86,8 @@ export const CategoryPieChart: React.FC<Props> = ({ data, baseCurrency }) => {
                 fill="transparent"
                 stroke={slice.color}
                 strokeWidth={isHovered ? 14 : 12}
-                strokeDasharray={`${strokeDashLength.toFixed(2)} ${circumference.toFixed(2)}`}
-                strokeDashoffset={strokeDashoffset.toFixed(2)}
+                strokeDasharray={`${slice.strokeDashLength.toFixed(2)} ${circumference.toFixed(2)}`}
+                strokeDashoffset={slice.strokeDashoffset.toFixed(2)}
                 className="transition-all duration-300 cursor-pointer"
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}

@@ -49,7 +49,7 @@ export const AddExpenseModal: React.FC<Props> = ({
     initialData?.category || categories[0]?.id || ''
   );
   const [date, setDate] = useState(
-    initialData?.date || new Date().toISOString().split('T')[0]
+    () => initialData?.date || new Date().toISOString().split('T')[0]
   );
   const [notes, setNotes] = useState(initialData?.notes || '');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'revolut' | 'bank'>('card');
